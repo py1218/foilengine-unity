@@ -1,0 +1,20 @@
+{
+  "name": "com.foilengine.sdk",
+  "version": "0.1.0",
+  "displayName": "Foil Engine SDK",
+  "description": "Unity SDK for the Foil Engine NPC API",
+  "license": "MIT",
+  "unity": "2021.3",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "author": {
+    "name": "Foil Engine",
+    "url": "https://foilengine.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/py1218/foilengine-unity.git"
+  },
+  "documentationUrl": "https://foilengine.com/docs/sdk/unity"
+}
