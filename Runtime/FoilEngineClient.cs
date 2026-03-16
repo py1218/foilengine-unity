@@ -22,11 +22,18 @@ namespace FoilEngine
 
         public FoilEngineClient(
             string apiKey,
-            string baseUrl = "https://api.foilengine.com",
+            string baseUrl = "https://api.foilengine.io",
             int timeout = 30,
-            int maxRetries = 3)
+            int maxRetries = 3,
+            string llmApiKey = null,
+            string llmModel = null,
+            string llmEvalModel = null,
+            string llmResponseModel = null,
+            string llmSummarizationModel = null)
         {
-            var http = new FoilHttpClient(apiKey, baseUrl, timeout, maxRetries);
+            var http = new FoilHttpClient(
+                apiKey, baseUrl, timeout, maxRetries,
+                llmApiKey, llmModel, llmEvalModel, llmResponseModel, llmSummarizationModel);
             Personas = new PersonasResource(http);
             Machines = new MachinesResource(http);
             Chat = new ChatResource(http);
