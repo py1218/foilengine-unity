@@ -1,6 +1,6 @@
 # Foil Engine Unity SDK
 
-Unity SDK for the [Foil Engine](https://foilengine.com) NPC API. Add AI-powered NPC conversations to your Unity game.
+Unity SDK for the [Foil Engine](https://foilengine.io) NPC API. Add AI-powered NPC conversations to your Unity game.
 
 ## Installation
 
@@ -9,7 +9,7 @@ Install via Unity Package Manager using a git URL:
 **Window > Package Manager > + > Add package from git URL:**
 
 ```
-https://github.com/py1218/foilengine-unity.git#v0.1.0
+https://github.com/py1218/foilengine-unity.git#v0.2.0
 ```
 
 Requires Unity 2021.3 or later.
@@ -20,7 +20,11 @@ Requires Unity 2021.3 or later.
 using FoilEngine;
 using FoilEngine.Models;
 
-var client = new FoilEngineClient("pk_live_...");
+var client = new FoilEngineClient(
+    "pk_live_...",
+    llmApiKey: "sk-...",   // your LLM provider API key
+    llmModel: "gpt-4o"    // any LiteLLM-supported model
+);
 
 Persona[] personas = await client.Personas.ListAsync();
 
@@ -54,7 +58,7 @@ StartCoroutine(client.Chat.SendMessage(
 
 ## Documentation
 
-Full documentation at [foilengine.com/docs/sdk/unity](https://foilengine.com/docs/sdk/unity)
+Full documentation at [foilengine.io/docs/sdk/unity](https://foilengine.io/docs/sdk/unity)
 
 ## License
 

@@ -33,13 +33,27 @@ namespace FoilEngine.Internal
         private readonly string _baseUrl;
         private readonly int _timeout;
         private readonly int _maxRetries;
+        private readonly string _llmApiKey;
+        private readonly string _llmModel;
+        private readonly string _llmEvalModel;
+        private readonly string _llmResponseModel;
+        private readonly string _llmSummarizationModel;
 
-        public FoilHttpClient(string apiKey, string baseUrl, int timeout = 30, int maxRetries = 3)
+        public FoilHttpClient(
+            string apiKey, string baseUrl, int timeout = 30, int maxRetries = 3,
+            string llmApiKey = null, string llmModel = null,
+            string llmEvalModel = null, string llmResponseModel = null,
+            string llmSummarizationModel = null)
         {
             _apiKey = apiKey;
             _baseUrl = baseUrl.TrimEnd('/');
             _timeout = timeout;
             _maxRetries = maxRetries;
+            _llmApiKey = llmApiKey;
+            _llmModel = llmModel;
+            _llmEvalModel = llmEvalModel;
+            _llmResponseModel = llmResponseModel;
+            _llmSummarizationModel = llmSummarizationModel;
         }
 
         // ---- Async/Await (Unity 2023+) ----
@@ -168,6 +182,16 @@ namespace FoilEngine.Internal
 
             request.SetRequestHeader("X-API-Key", _apiKey);
             request.SetRequestHeader("Content-Type", "application/json");
+            if (!string.IsNullOrEmpty(_llmApiKey))
+                request.SetRequestHeader("X-LLM-API-Key", _llmApiKey);
+            if (!string.IsNullOrEmpty(_llmModel))
+                request.SetRequestHeader("X-LLM-Model", _llmModel);
+            if (!string.IsNullOrEmpty(_llmEvalModel))
+                request.SetRequestHeader("X-LLM-Eval-Model", _llmEvalModel);
+            if (!string.IsNullOrEmpty(_llmResponseModel))
+                request.SetRequestHeader("X-LLM-Response-Model", _llmResponseModel);
+            if (!string.IsNullOrEmpty(_llmSummarizationModel))
+                request.SetRequestHeader("X-LLM-Summarization-Model", _llmSummarizationModel);
             return request;
         }
 
