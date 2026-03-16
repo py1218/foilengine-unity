@@ -12,6 +12,12 @@ namespace FoilEngine
         private readonly FoilHttpClient _http;
         internal ChatResource(FoilHttpClient http) => _http = http;
 
+        private static void Require(string value, string name)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException($"{name} must be a non-empty string", name);
+        }
+
         // ---- Async methods ----
 
         /// <summary>Initialize a new chat session (async).</summary>
@@ -22,6 +28,10 @@ namespace FoilEngine
             string playerGender,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(userSessionId, nameof(userSessionId));
+            Require(playerName, nameof(playerName));
+            Require(playerGender, nameof(playerGender));
             var qs = machineId != null ? $"machine_id={Uri.EscapeDataString(machineId)}" : null;
             return _http.PostAsync<SessionInit>(
                 $"/api/v1/sdk/chat/{personaId}/init-session",
@@ -37,6 +47,9 @@ namespace FoilEngine
             string userSessionId,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(message, nameof(message));
+            Require(userSessionId, nameof(userSessionId));
             var qs = machineId != null ? $"machine_id={Uri.EscapeDataString(machineId)}" : null;
             return _http.PostAsync<ChatResponse>(
                 $"/api/v1/sdk/chat/{personaId}/message",
@@ -51,6 +64,8 @@ namespace FoilEngine
             string userSessionId,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(userSessionId, nameof(userSessionId));
             var qs = $"user_session_id={Uri.EscapeDataString(userSessionId)}";
             if (machineId != null) qs += $"&machine_id={Uri.EscapeDataString(machineId)}";
             return _http.GetAsync<SessionStatus>($"/api/v1/sdk/chat/{personaId}/session", qs);
@@ -62,6 +77,8 @@ namespace FoilEngine
             string userSessionId,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(userSessionId, nameof(userSessionId));
             var qs = $"user_session_id={Uri.EscapeDataString(userSessionId)}";
             if (machineId != null) qs += $"&machine_id={Uri.EscapeDataString(machineId)}";
             return _http.GetAsync<ChatHistory>($"/api/v1/sdk/chat/{personaId}/history", qs);
@@ -73,6 +90,8 @@ namespace FoilEngine
             string userSessionId,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(userSessionId, nameof(userSessionId));
             var qs = $"user_session_id={Uri.EscapeDataString(userSessionId)}";
             if (machineId != null) qs += $"&machine_id={Uri.EscapeDataString(machineId)}";
             return _http.PostAsync<ResetResult>($"/api/v1/sdk/chat/{personaId}/reset", null, qs);
@@ -90,6 +109,10 @@ namespace FoilEngine
             Action<FoilEngineException> onError = null,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(userSessionId, nameof(userSessionId));
+            Require(playerName, nameof(playerName));
+            Require(playerGender, nameof(playerGender));
             var qs = machineId != null ? $"machine_id={Uri.EscapeDataString(machineId)}" : null;
             return _http.Post(
                 $"/api/v1/sdk/chat/{personaId}/init-session",
@@ -107,6 +130,9 @@ namespace FoilEngine
             Action<FoilEngineException> onError = null,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(message, nameof(message));
+            Require(userSessionId, nameof(userSessionId));
             var qs = machineId != null ? $"machine_id={Uri.EscapeDataString(machineId)}" : null;
             return _http.Post(
                 $"/api/v1/sdk/chat/{personaId}/message",
@@ -123,6 +149,8 @@ namespace FoilEngine
             Action<FoilEngineException> onError = null,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(userSessionId, nameof(userSessionId));
             var qs = $"user_session_id={Uri.EscapeDataString(userSessionId)}";
             if (machineId != null) qs += $"&machine_id={Uri.EscapeDataString(machineId)}";
             return _http.Get($"/api/v1/sdk/chat/{personaId}/session", qs, onSuccess, onError);
@@ -136,6 +164,8 @@ namespace FoilEngine
             Action<FoilEngineException> onError = null,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(userSessionId, nameof(userSessionId));
             var qs = $"user_session_id={Uri.EscapeDataString(userSessionId)}";
             if (machineId != null) qs += $"&machine_id={Uri.EscapeDataString(machineId)}";
             return _http.Get($"/api/v1/sdk/chat/{personaId}/history", qs, onSuccess, onError);
@@ -149,6 +179,8 @@ namespace FoilEngine
             Action<FoilEngineException> onError = null,
             string machineId = null)
         {
+            Require(personaId, nameof(personaId));
+            Require(userSessionId, nameof(userSessionId));
             var qs = $"user_session_id={Uri.EscapeDataString(userSessionId)}";
             if (machineId != null) qs += $"&machine_id={Uri.EscapeDataString(machineId)}";
             return _http.Post($"/api/v1/sdk/chat/{personaId}/reset", null, qs, onSuccess, onError);

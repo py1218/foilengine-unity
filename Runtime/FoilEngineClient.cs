@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using FoilEngine.Internal;
 
 namespace FoilEngine
@@ -16,6 +17,7 @@ namespace FoilEngine
     /// </summary>
     public class FoilEngineClient
     {
+        private readonly FoilHttpClient _http;
         public PersonasResource Personas { get; }
         public MachinesResource Machines { get; }
         public ChatResource Chat { get; }
@@ -32,15 +34,25 @@ namespace FoilEngine
             string llmSummarizationModel = null,
             string llmEvalApiKey = null,
             string llmResponseApiKey = null,
-            string llmSummarizationApiKey = null)
+            string llmSummarizationApiKey = null,
+            bool debug = false,
+            float cacheTtl = 60)
         {
-            var http = new FoilHttpClient(
+            _http = new FoilHttpClient(
                 apiKey, baseUrl, timeout, maxRetries,
                 llmApiKey, llmModel, llmEvalModel, llmResponseModel, llmSummarizationModel,
-                llmEvalApiKey, llmResponseApiKey, llmSummarizationApiKey);
-            Personas = new PersonasResource(http);
-            Machines = new MachinesResource(http);
-            Chat = new ChatResource(http);
+                llmEvalApiKey, llmResponseApiKey, llmSummarizationApiKey,
+                debug);
+            Personas = new PersonasResource(_http, cacheTtl);
+            Machines = new MachinesResource(_http);
+            Chat = new ChatResource(_http);
+        }
+
+        /// <summary>Validate that the configured LLM API key works.</summary>
+        public Task<Models.ValidateLlmKeyResult> ValidateLlmKeyAsync(string model = null)
+        {
+            var body = model != null ? new { model } : null;
+            return _http.PostAsync<Models.ValidateLlmKeyResult>("/api/v1/sdk/validate-llm-key", body);
         }
     }
 }

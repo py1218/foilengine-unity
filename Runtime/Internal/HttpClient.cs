@@ -29,10 +29,12 @@ namespace FoilEngine.Internal
     /// </summary>
     internal class FoilHttpClient
     {
+        private static readonly System.Random _jitter = new();
         private readonly string _apiKey;
         private readonly string _baseUrl;
         private readonly int _timeout;
         private readonly int _maxRetries;
+        private readonly bool _debug;
         private readonly string _llmApiKey;
         private readonly string _llmModel;
         private readonly string _llmEvalModel;
@@ -48,12 +50,14 @@ namespace FoilEngine.Internal
             string llmEvalModel = null, string llmResponseModel = null,
             string llmSummarizationModel = null,
             string llmEvalApiKey = null, string llmResponseApiKey = null,
-            string llmSummarizationApiKey = null)
+            string llmSummarizationApiKey = null,
+            bool debug = false)
         {
             _apiKey = apiKey;
             _baseUrl = baseUrl.TrimEnd('/');
             _timeout = timeout;
             _maxRetries = maxRetries;
+            _debug = debug;
             _llmApiKey = llmApiKey;
             _llmModel = llmModel;
             _llmEvalModel = llmEvalModel;
@@ -88,6 +92,8 @@ namespace FoilEngine.Internal
                 using var request = CreateRequest(method, url, bodyJson);
                 request.timeout = _timeout;
 
+                if (_debug) Debug.Log($"[FoilEngine] {method} {url}");
+
                 var operation = request.SendWebRequest();
 
                 // Await the async operation
@@ -96,6 +102,7 @@ namespace FoilEngine.Internal
 
                 if (request.result == UnityWebRequest.Result.Success)
                 {
+                    if (_debug) Debug.Log($"[FoilEngine] {(int)request.responseCode} OK");
                     return JsonConvert.DeserializeObject<T>(request.downloadHandler.text);
                 }
 
@@ -103,6 +110,7 @@ namespace FoilEngine.Internal
 
                 if (IsRetryable(statusCode) && attempt < _maxRetries)
                 {
+                    if (_debug) Debug.Log($"[FoilEngine] {statusCode} retry {attempt + 1}/{_maxRetries}");
                     var wait = GetRetryDelay(request, attempt);
                     await Task.Delay((int)(wait * 1000));
                     continue;
@@ -136,10 +144,13 @@ namespace FoilEngine.Internal
                 using var request = CreateRequest(method, url, bodyJson);
                 request.timeout = _timeout;
 
+                if (_debug) Debug.Log($"[FoilEngine] {method} {url}");
+
                 yield return request.SendWebRequest();
 
                 if (request.result == UnityWebRequest.Result.Success)
                 {
+                    if (_debug) Debug.Log($"[FoilEngine] {(int)request.responseCode} OK");
                     var result = JsonConvert.DeserializeObject<T>(request.downloadHandler.text);
                     onSuccess?.Invoke(result);
                     yield break;
@@ -149,6 +160,7 @@ namespace FoilEngine.Internal
 
                 if (IsRetryable(statusCode) && attempt < _maxRetries)
                 {
+                    if (_debug) Debug.Log($"[FoilEngine] {statusCode} retry {attempt + 1}/{_maxRetries}");
                     var wait = GetRetryDelay(request, attempt);
                     yield return new WaitForSeconds(wait);
                     continue;
@@ -227,7 +239,7 @@ namespace FoilEngine.Internal
             var retryAfter = request.GetResponseHeader("Retry-After");
             if (!string.IsNullOrEmpty(retryAfter) && float.TryParse(retryAfter, out var seconds))
                 return seconds;
-            return Mathf.Pow(2, attempt) * 0.5f;
+            return Mathf.Pow(2, attempt) * 0.5f * (0.5f + (float)_jitter.NextDouble() * 0.5f);
         }
 
         private static void ThrowForStatus(int statusCode, string responseBody)
