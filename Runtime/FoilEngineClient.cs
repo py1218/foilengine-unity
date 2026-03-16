@@ -29,11 +29,15 @@ namespace FoilEngine
             string llmModel = null,
             string llmEvalModel = null,
             string llmResponseModel = null,
-            string llmSummarizationModel = null)
+            string llmSummarizationModel = null,
+            string llmEvalApiKey = null,
+            string llmResponseApiKey = null,
+            string llmSummarizationApiKey = null)
         {
             var http = new FoilHttpClient(
                 apiKey, baseUrl, timeout, maxRetries,
-                llmApiKey, llmModel, llmEvalModel, llmResponseModel, llmSummarizationModel);
+                llmApiKey, llmModel, llmEvalModel, llmResponseModel, llmSummarizationModel,
+                llmEvalApiKey, llmResponseApiKey, llmSummarizationApiKey);
             Personas = new PersonasResource(http);
             Machines = new MachinesResource(http);
             Chat = new ChatResource(http);

@@ -38,12 +38,17 @@ namespace FoilEngine.Internal
         private readonly string _llmEvalModel;
         private readonly string _llmResponseModel;
         private readonly string _llmSummarizationModel;
+        private readonly string _llmEvalApiKey;
+        private readonly string _llmResponseApiKey;
+        private readonly string _llmSummarizationApiKey;
 
         public FoilHttpClient(
             string apiKey, string baseUrl, int timeout = 30, int maxRetries = 3,
             string llmApiKey = null, string llmModel = null,
             string llmEvalModel = null, string llmResponseModel = null,
-            string llmSummarizationModel = null)
+            string llmSummarizationModel = null,
+            string llmEvalApiKey = null, string llmResponseApiKey = null,
+            string llmSummarizationApiKey = null)
         {
             _apiKey = apiKey;
             _baseUrl = baseUrl.TrimEnd('/');
@@ -54,6 +59,9 @@ namespace FoilEngine.Internal
             _llmEvalModel = llmEvalModel;
             _llmResponseModel = llmResponseModel;
             _llmSummarizationModel = llmSummarizationModel;
+            _llmEvalApiKey = llmEvalApiKey;
+            _llmResponseApiKey = llmResponseApiKey;
+            _llmSummarizationApiKey = llmSummarizationApiKey;
         }
 
         // ---- Async/Await (Unity 2023+) ----
@@ -192,6 +200,12 @@ namespace FoilEngine.Internal
                 request.SetRequestHeader("X-LLM-Response-Model", _llmResponseModel);
             if (!string.IsNullOrEmpty(_llmSummarizationModel))
                 request.SetRequestHeader("X-LLM-Summarization-Model", _llmSummarizationModel);
+            if (!string.IsNullOrEmpty(_llmEvalApiKey))
+                request.SetRequestHeader("X-LLM-Eval-API-Key", _llmEvalApiKey);
+            if (!string.IsNullOrEmpty(_llmResponseApiKey))
+                request.SetRequestHeader("X-LLM-Response-API-Key", _llmResponseApiKey);
+            if (!string.IsNullOrEmpty(_llmSummarizationApiKey))
+                request.SetRequestHeader("X-LLM-Summarization-API-Key", _llmSummarizationApiKey);
             return request;
         }
 
