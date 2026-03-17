@@ -99,6 +99,29 @@ namespace FoilEngine.Tests
                 await _client.Machines.ListAsync("persona1", ""));
         }
 
+        // --- SendMessageStreamAsync ---
+
+        [Test]
+        public void SendMessageStream_EmptyPersonaId_Throws()
+        {
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _client.Chat.SendMessageStreamAsync("", "hello", "session1"));
+        }
+
+        [Test]
+        public void SendMessageStream_EmptyMessage_Throws()
+        {
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _client.Chat.SendMessageStreamAsync("persona1", "", "session1"));
+        }
+
+        [Test]
+        public void SendMessageStream_EmptySessionId_Throws()
+        {
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _client.Chat.SendMessageStreamAsync("persona1", "hello", ""));
+        }
+
         // --- Null values ---
 
         [Test]
@@ -113,6 +136,13 @@ namespace FoilEngine.Tests
         {
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await _client.Chat.SendMessageAsync("persona1", null, "session1"));
+        }
+
+        [Test]
+        public void SendMessageStream_NullMessage_Throws()
+        {
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _client.Chat.SendMessageStreamAsync("persona1", null, "session1"));
         }
     }
 }
