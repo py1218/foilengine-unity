@@ -28,6 +28,29 @@ namespace FoilEngine.Models
         [JsonProperty("unlocked_machines")] public UnlockedMachine[] UnlockedMachines;
     }
 
+    /// <summary>Metadata sent before text streaming begins (SSE "metadata" event).</summary>
+    [Serializable]
+    public class ChatStreamMetadata
+    {
+        [JsonProperty("current_state")] public string CurrentState;
+        [JsonProperty("score")] public int Score;
+        [JsonProperty("outcome")] public string Outcome;
+        [JsonProperty("decision")] public string Decision;
+        [JsonProperty("follow_up")] public bool FollowUp;
+        [JsonProperty("session_id")] public string SessionId;
+        [JsonProperty("scoring_mode")] public string ScoringMode;
+        [JsonProperty("redirect_count")] public int? RedirectCount;
+        [JsonProperty("machine_completed")] public bool MachineCompleted;
+        [JsonProperty("unlocked_machines")] public UnlockedMachine[] UnlockedMachines;
+    }
+
+    /// <summary>A text chunk from SSE "text_delta" event.</summary>
+    [Serializable]
+    public class ChatStreamTextDelta
+    {
+        [JsonProperty("text")] public string Text;
+    }
+
     [Serializable]
     public class ChatMessage
     {

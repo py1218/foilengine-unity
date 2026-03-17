@@ -43,6 +43,7 @@ namespace FoilEngine.Internal
         private readonly string _llmEvalApiKey;
         private readonly string _llmResponseApiKey;
         private readonly string _llmSummarizationApiKey;
+        private readonly IRequestHook[] _hooks;
 
         public FoilHttpClient(
             string apiKey, string baseUrl, int timeout = 30, int maxRetries = 3,
@@ -51,7 +52,8 @@ namespace FoilEngine.Internal
             string llmSummarizationModel = null,
             string llmEvalApiKey = null, string llmResponseApiKey = null,
             string llmSummarizationApiKey = null,
-            bool debug = false)
+            bool debug = false,
+            IRequestHook[] hooks = null)
         {
             _apiKey = apiKey;
             _baseUrl = baseUrl.TrimEnd('/');
@@ -66,6 +68,7 @@ namespace FoilEngine.Internal
             _llmEvalApiKey = llmEvalApiKey;
             _llmResponseApiKey = llmResponseApiKey;
             _llmSummarizationApiKey = llmSummarizationApiKey;
+            _hooks = hooks ?? Array.Empty<IRequestHook>();
         }
 
         // ---- Async/Await (Unity 2023+) ----
@@ -93,16 +96,20 @@ namespace FoilEngine.Internal
                 request.timeout = _timeout;
 
                 if (_debug) Debug.Log($"[FoilEngine] {method} {url}");
+                foreach (var hook in _hooks) hook.BeforeRequest(method, url);
 
+                var startTime = Time.realtimeSinceStartup;
                 var operation = request.SendWebRequest();
 
-                // Await the async operation
                 while (!operation.isDone)
                     await Task.Yield();
+
+                var elapsedMs = (Time.realtimeSinceStartup - startTime) * 1000f;
 
                 if (request.result == UnityWebRequest.Result.Success)
                 {
                     if (_debug) Debug.Log($"[FoilEngine] {(int)request.responseCode} OK");
+                    foreach (var hook in _hooks) hook.AfterResponse(method, url, (int)request.responseCode, elapsedMs);
                     return JsonConvert.DeserializeObject<T>(request.downloadHandler.text);
                 }
 
@@ -116,6 +123,11 @@ namespace FoilEngine.Internal
                     continue;
                 }
 
+                foreach (var hook in _hooks)
+                {
+                    try { hook.OnError(method, url, new FoilEngineException(request.downloadHandler?.text ?? "Request failed", statusCode)); }
+                    catch { /* don't let hook errors mask the real error */ }
+                }
                 ThrowForStatus(statusCode, request.downloadHandler?.text);
             }
 
@@ -178,6 +190,34 @@ namespace FoilEngine.Internal
             }
 
             onError?.Invoke(new FoilEngineException("Max retries exceeded"));
+        }
+
+        // ---- Public helpers for streaming (used by ChatResource) ----
+
+        /// <summary>Build a full URL from path and query string.</summary>
+        internal string BuildUrlPublic(string path, string queryString) => BuildUrl(path, queryString);
+
+        /// <summary>Set auth headers on a UnityWebRequest.</summary>
+        internal void SetHeaders(UnityWebRequest request)
+        {
+            request.SetRequestHeader("X-API-Key", _apiKey);
+            request.SetRequestHeader("Content-Type", "application/json");
+            if (!string.IsNullOrEmpty(_llmApiKey))
+                request.SetRequestHeader("X-LLM-API-Key", _llmApiKey);
+            if (!string.IsNullOrEmpty(_llmModel))
+                request.SetRequestHeader("X-LLM-Model", _llmModel);
+            if (!string.IsNullOrEmpty(_llmEvalModel))
+                request.SetRequestHeader("X-LLM-Eval-Model", _llmEvalModel);
+            if (!string.IsNullOrEmpty(_llmResponseModel))
+                request.SetRequestHeader("X-LLM-Response-Model", _llmResponseModel);
+            if (!string.IsNullOrEmpty(_llmSummarizationModel))
+                request.SetRequestHeader("X-LLM-Summarization-Model", _llmSummarizationModel);
+            if (!string.IsNullOrEmpty(_llmEvalApiKey))
+                request.SetRequestHeader("X-LLM-Eval-API-Key", _llmEvalApiKey);
+            if (!string.IsNullOrEmpty(_llmResponseApiKey))
+                request.SetRequestHeader("X-LLM-Response-API-Key", _llmResponseApiKey);
+            if (!string.IsNullOrEmpty(_llmSummarizationApiKey))
+                request.SetRequestHeader("X-LLM-Summarization-API-Key", _llmSummarizationApiKey);
         }
 
         // ---- Helpers ----
